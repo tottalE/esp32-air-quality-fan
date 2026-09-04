@@ -2,8 +2,7 @@
 
 ## 2026-09-04 — Design full process
 ### Objective
-
-What did we want to implement or investigate?
+Design general flow, write header file and c file for aht20 initalization
 
 ### Work Completed
 
@@ -13,6 +12,7 @@ Completed:
 ✓ Responsibility boundaries
 ✓ Shared I²C bus ownership
 ✓ General startup/runtime flow
+✓ aht20 initialization with I²C bus
 
 Still open, but not blocking:
 - Final fan-control formula
@@ -21,5 +21,4 @@ Still open, but not blocking:
 - Detailed failure policy
 
 ### Next Step
-
-What should be done next?
+- aht20 API and implementation

@@ -18,7 +18,7 @@ The sensor module contains two separate sensors:
 - ENS160: air-quality sensor
 - AHT2x: temperature and relative-humidity sensor
 
-Although they are mounted on the same module, they are separate I²C devices with different responsibilities.
+Although they are mounted on the same module, they are separate I²C devices with different responsibilities. But still, sharing same I²C bus.
 
 The exact AHT2x model must be confirmed before implementing its driver.
 
@@ -45,3 +45,4 @@ Application fan-control policy
   │
   ▼
 GPIO → MOSFET → fan
+
