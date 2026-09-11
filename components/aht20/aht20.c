@@ -1,4 +1,7 @@
+#include <stdbool.h>
 #include "aht20.h"
+
+#define AHT20_STATUS_CALIBRATED_BIT (1U << 3)
 
 esp_err_t aht20_init(
     aht20_t *sensor,
@@ -6,13 +9,32 @@ esp_err_t aht20_init(
     uint8_t address,
     uint32_t clock_speed_hz)
 {
+    // Validate required handles.
+    if (sensor == NULL || bus == NULL) {
+    return ESP_ERR_INVALID_ARG;
+    }
+
+    // Initialize the I2C device configuration
     i2c_device_config_t device_config = {
         .dev_addr_length = I2C_ADDR_BIT_LEN_7,
         .device_address = address,
         .scl_speed_hz = clock_speed_hz,
     };
-    return i2c_master_bus_add_device(
+
+    // Add the AHT20 device to the I2C bus
+    esp_err_t error = i2c_master_bus_add_device(
         bus,
         &device_config,
         &sensor->i2c_device);
+
+    if (error != ESP_OK) {
+        return error;
+    }
+
+    return ESP_OK;
+}
+
+static bool aht20_is_calibrated(uint8_t status)
+{
+    return (status & AHT20_STATUS_CALIBRATED_BIT) != 0U;
 }
