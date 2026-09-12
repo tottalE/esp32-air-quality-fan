@@ -22,3 +22,17 @@ Still open, but not blocking:
 
 ### Next Step
 - aht20 API and implementation
+
+## 2026-09-11 — Full driver codes
+### Objective
+Write driver codes
+
+### Work Completed
+
+Completed:
+✓ AHT20: Calibration check
+✓ AHT20: Validation logic
+
+### Next Step
+- aht20 API and implementation
+
