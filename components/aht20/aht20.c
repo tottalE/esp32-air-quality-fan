@@ -2,6 +2,11 @@
 #include "aht20.h"
 
 #define AHT20_STATUS_CALIBRATED_BIT (1U << 3)
+#define AHT20_I2C_TIMEOUT_MS 1000
+
+static bool aht20_is_calibrated(uint8_t status);
+static esp_err_t aht20_read_status(aht20_t *sensor, uint8_t *status);
+
 
 esp_err_t aht20_init(
     aht20_t *sensor,
@@ -36,5 +41,15 @@ esp_err_t aht20_init(
 
 static bool aht20_is_calibrated(uint8_t status)
 {
-    return (status & AHT20_STATUS_CALIBRATED_BIT) != 0U;
+    return (status & AHT20_STATUS_CALIBRATED_BIT) != 0U; // Check if the calibration bit is set
+}
+
+
+static esp_err_t aht20_read_status(aht20_t *sensor, uint8_t *status)
+{
+    return i2c_master_receive(
+        sensor->i2c_device,
+        status,
+        sizeof(*status),
+        AHT20_I2C_TIMEOUT_MS);
 }
