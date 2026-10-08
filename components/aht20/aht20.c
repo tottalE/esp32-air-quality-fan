@@ -12,10 +12,18 @@
 #define AHT20_MEASUREMENT_DELAY_MS  80
 #define AHT20_RESPONSE_SIZE         7
 
+#define AHT20_DATA_SIZE 6
+#define AHT20_CRC_POLYNOMIAL 0x31U
+#define AHT20_RAW_SCALE 1048576.0F
+
 static bool aht20_is_calibrated(uint8_t status);
 static esp_err_t aht20_read_status(aht20_t *sensor, uint8_t *status);
 static esp_err_t aht20_send_initialization(aht20_t *sensor);
 static esp_err_t aht20_read_raw_measurement(aht20_t *sensor, uint8_t data[AHT20_RESPONSE_SIZE]);
+static uint32_t aht20_extract_raw_humidity(const uint8_t data[AHT20_RESPONSE_SIZE]);
+static uint32_t aht20_extract_raw_temperature(const uint8_t data[AHT20_RESPONSE_SIZE]);
+static uint8_t aht20_calculate_crc(const uint8_t data[AHT20_RESPONSE_SIZE]);
+
 
 esp_err_t aht20_init(
     aht20_t *sensor,
@@ -70,6 +78,47 @@ esp_err_t aht20_init(
         // Wait AHT20_I2C_INIT_DELAY_MS
         vTaskDelay(pdMS_TO_TICKS(AHT20_I2C_INIT_DELAY_MS));
     }
+
+    return ESP_OK;
+}
+
+esp_err_t aht20_measure(
+    aht20_t *sensor,
+    aht20_data_t *measurement)
+{
+    if (sensor == NULL || measurement == NULL)
+    {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    uint8_t data[AHT20_RESPONSE_SIZE];
+
+    esp_err_t error = aht20_read_raw_measurement(sensor, data);
+    if (error != ESP_OK)
+    {
+        return error;
+    }
+
+    uint8_t calculated_crc = aht20_calculate_crc(data);
+
+    if (calculated_crc != data[6])
+    {
+        return ESP_ERR_INVALID_CRC;
+    }
+
+    uint32_t raw_humidity =
+        aht20_extract_raw_humidity(data);
+
+    uint32_t raw_temperature =
+        aht20_extract_raw_temperature(data);
+
+    measurement->humidity_percent =
+        ((float)raw_humidity / AHT20_RAW_SCALE) * 100.0F;
+
+    measurement->temperature_c =
+        ((float)raw_temperature / AHT20_RAW_SCALE) *
+            200.0F -
+        50.0F;
 
     return ESP_OK;
 }
@@ -150,4 +199,49 @@ static esp_err_t aht20_read_raw_measurement(
 
     /* 8. Otherwise, return ESP_OK. */
     return ESP_OK;
+}
+
+static uint32_t aht20_extract_raw_humidity(
+    const uint8_t data[AHT20_RESPONSE_SIZE])
+{
+    return ((uint32_t)data[1] << 12) |
+           ((uint32_t)data[2] << 4) |
+           ((uint32_t)data[3] >> 4);
+}
+
+static uint32_t aht20_extract_raw_temperature(
+    const uint8_t data[AHT20_RESPONSE_SIZE])
+{
+    return (((uint32_t)data[3] & 0x0FU) << 16) |
+           ((uint32_t)data[4] << 8) |
+           (uint32_t)data[5];
+}
+
+// Check the CRC of the received data to ensure data integrity
+static uint8_t aht20_calculate_crc(
+    const uint8_t data[AHT20_RESPONSE_SIZE])
+{
+    uint8_t crc = 0xFFU;
+
+    for (uint8_t byte_index = 0;
+         byte_index < AHT20_DATA_SIZE;
+         ++byte_index)
+    {
+        crc ^= data[byte_index];
+
+        for (uint8_t bit_index = 0; bit_index < 8U; ++bit_index)
+        {
+            if ((crc & 0x80U) != 0U)
+            {
+                crc = (uint8_t)((crc << 1) ^
+                                AHT20_CRC_POLYNOMIAL);
+            }
+            else
+            {
+                crc = (uint8_t)(crc << 1);
+            }
+        }
+    }
+
+    return crc;
 }
