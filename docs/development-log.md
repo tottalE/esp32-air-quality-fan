@@ -36,3 +36,38 @@ Completed:
 ### Next Step
 - aht20 API and implementation
 
+## 2026-09-16 — aht20 API and implementation
+### Objective
+Write driver codes
+
+### Work Completed
+
+Validate arguments
+→ register AHT20 on the existing I²C bus
+→ wait 40 ms
+→ read the status byte
+→ check calibration bit 3
+→ send {0xBE, 0x08, 0x00} if needed
+→ wait 10 ms
+→ return ESP_OK or the encountered error
+
+### Next Step
+- Measurement command + raw-data reading
+
+## 2026-10-03 — aht20 API
+### Objective
+Write function to 
+
+### Work Completed
+
+Validate arguments
+→ register AHT20 on the existing I²C bus
+→ wait 40 ms
+→ read the status byte
+→ check calibration bit 3
+→ send {0xBE, 0x08, 0x00} if needed
+→ wait 10 ms
+→ return ESP_OK or the encountered error
+
+### Next Step
+- Measurement command + raw-data reading
