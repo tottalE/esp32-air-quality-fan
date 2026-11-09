@@ -4,11 +4,21 @@ An embedded ventilation system that monitors air quality and controls a fan usin
 
 ## Overview
 
-Briefly explain:
+An ESP32-C3 project that reads temperature, humidity and air-quality data over I²C
+and will switch a ventilation fan through a MOSFET. The sensor drivers are written
+in C on ESP-IDF, directly from the datasheets.
 
-- What problem does the project solve?
-- Why did you start the project?
-- Where could the system be used?
+**Status**
+
+- AHT20 (temperature/humidity) driver: done, tested on hardware
+- ENS160 (air quality) driver: in progress
+- Fan control: planned
+
+**Prototype** (hand-soldered on perfboard: ESP32-C3, ENS160/AHT20 sensor module, MOSFET, LED)
+
+| Front | Back |
+|---|---|
+| ![Prototype front](docs/images/prototype-front.jpg) | ![Prototype back](docs/images/prototype-back.jpg) |
 
 ## Project Goals
 
